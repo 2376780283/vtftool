@@ -1,0 +1,20 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/VtfTool/app/src/main/java/zzh/bin/valvevtftool/MainActivity.kt",
+      "selection": {
+        "end": {
+          "column": 9,
+          "index": 1015,
+          "line": 26
+        },
+        "start": {
+          "column": 9,
+          "index": 1015,
+          "line": 26
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/VtfTool/app/src/main/java/zzh/bin/valvevtftool/MainActivity.kt"
+}
