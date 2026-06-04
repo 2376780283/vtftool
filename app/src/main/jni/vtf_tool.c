@@ -244,17 +244,56 @@ JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_vtfToPng(JNIEnv* env
     }
     LOGI("vtfToPng: Header signature valid");
     
+    // --- IMPROVED BOUNDS-CHECKED RESOURCE SEARCHING ---
     int image_end = filesize;
     if(header->version[1] > 2) {
+        // Validate resources array is within file
+        if (sizeof(vtf_header_t) + header->numResources * sizeof(vtf_resurce_entry_t) > filesize) {
+             LOGI("vtfToPng: Resources overflow file size");
+             munmap(filedata, filesize); close(fd);
+             release_string(env, vtfPath, vPath); release_string(env, pngPath, pPath);
+             return JNI_FALSE;
+        }
+
+        enum { FOUND_NOTHING, FOUND_IMAGEDATA, FOUND_END } search_state = FOUND_NOTHING;
         vtf_resurce_entry_t *resources = (vtf_resurce_entry_t*)(filedata+sizeof(vtf_header_t));
         for(unsigned i=0; i<header->numResources; i++) {
-            if (resources[i].tag[0] != 0x30 && resources[i].offset != 0) {
-                image_end = resources[i].offset;
-                break;
+            switch(search_state) {
+                case FOUND_NOTHING:
+                    if (resources[i].tag[0] == 0x30) search_state = FOUND_IMAGEDATA;
+                    break;
+                case FOUND_IMAGEDATA:
+                    if (resources[i].tag[0] != 'C' && resources[i].offset < filesize) {
+                        image_end = resources[i].offset;
+                        search_state = FOUND_END;
+                    }
+                    break;
+                case FOUND_END: break;
             }
+            if (search_state == FOUND_END) break;
         }
+        if (search_state == FOUND_IMAGEDATA) image_end = filesize; // Fallback
     }
     LOGI("vtfToPng: image_end: %d", image_end);
+
+    // Calculate data size for selected format to validate pointer
+    size_t data_size = 0;
+    size_t framesize = (size_t)header->width * header->height;
+    switch(header->image_format) {
+        case IMAGE_FORMAT_RGBA8888: case IMAGE_FORMAT_ARGB8888: case IMAGE_FORMAT_ABGR8888: case IMAGE_FORMAT_BGRA8888: data_size = framesize * 4; break;
+        case IMAGE_FORMAT_RGB888: case IMAGE_FORMAT_BGR888: data_size = framesize * 3; break;
+        case IMAGE_FORMAT_DXT1: data_size = ((header->width+3)/4) * ((header->height+3)/4) * 8; break;
+        case IMAGE_FORMAT_DXT3: case IMAGE_FORMAT_DXT5: data_size = ((header->width+3)/4) * ((header->height+3)/4) * 16; break;
+        default: break;
+    }
+    
+    if (data_size == 0 || (size_t)image_end < data_size) {
+        LOGI("vtfToPng: Invalid image data size calculation");
+        munmap(filedata, filesize); close(fd);
+        release_string(env, vtfPath, vPath); release_string(env, pngPath, pPath);
+        return JNI_FALSE;
+    }
+    // --- END IMPROVED LOGIC ---
 
     uint8_t** rgba_rows = malloc(sizeof(uint8_t*)*header->height);
     if (!rgba_rows) {
@@ -287,19 +326,19 @@ JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_vtfToPng(JNIEnv* env
         case IMAGE_FORMAT_RGB888:
         case IMAGE_FORMAT_BGR888:
             LOGI("vtfToPng: decoding rgba");
-            decode_rgba(header, filedata + image_end - (header->width * header->height * 4 * frame_offset), rgba_rows);
+            decode_rgba(header, filedata + image_end - (data_size * frame_offset), rgba_rows);
             break;
         case IMAGE_FORMAT_DXT1:
             LOGI("vtfToPng: decoding dxt1");
-            decode_dxt1(header, filedata + image_end - (((header->width+3)/4) * ((header->height+3)/4) * 8 * frame_offset), rgba_rows);
+            decode_dxt1(header, filedata + image_end - (data_size * frame_offset), rgba_rows);
             break;
         case IMAGE_FORMAT_DXT3:
             LOGI("vtfToPng: decoding dxt3");
-            decode_dxt3(header, filedata + image_end - (((header->width+3)/4) * ((header->height+3)/4) * 16 * frame_offset), rgba_rows);
+            decode_dxt3(header, filedata + image_end - (data_size * frame_offset), rgba_rows);
             break;
         case IMAGE_FORMAT_DXT5:
             LOGI("vtfToPng: decoding dxt5");
-            decode_dxt5(header, filedata + image_end - (((header->width+3)/4) * ((header->height+3)/4) * 16 * frame_offset), rgba_rows);
+            decode_dxt5(header, filedata + image_end - (data_size * frame_offset), rgba_rows);
             break;
         default:
             LOGI("vtfToPng: Unsupported format: %d", header->image_format);
