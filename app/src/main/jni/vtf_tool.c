@@ -11,6 +11,9 @@
 #include <sys/stat.h>
 #include <android/log.h>
 
+#define STB_DXT_IMPLEMENTATION
+#include "libstb/stb_dxt.h"
+
 #define LOG_TAG "VTF_TOOL"
 
 static void write_log(const char* message) {
@@ -354,7 +357,7 @@ JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_vtfToPng(JNIEnv* env
     return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_pngToVtf(JNIEnv* env, jobject obj, jstring pngPath, jstring vtfPath) {
+JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_pngToVtf(JNIEnv* env, jobject obj, jstring pngPath, jstring vtfPath, jint format) {
     const char* pPath = get_string(env, pngPath);
     const char* vPath = get_string(env, vtfPath);
 
@@ -381,6 +384,9 @@ JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_pngToVtf(JNIEnv* env
         return JNI_FALSE;
     }
 
+    int width = image.width;
+    int height = image.height;
+
     // 2. Prepare Header
     vtf_header_t header;
     memset(&header, 0, sizeof(header));
@@ -388,11 +394,13 @@ JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_pngToVtf(JNIEnv* env
     header.version[0] = 7;
     header.version[1] = 4;
     header.header_size = sizeof(header);
-    header.width = (unsigned short)image.width;
-    header.height = (unsigned short)image.height;
-    header.image_format = IMAGE_FORMAT_RGBA8888;
+    header.width = (unsigned short)width;
+    header.height = (unsigned short)height;
+    header.image_format = format;
     header.mipmap_count = 1;
-    header.numResources = 0;
+    header.frames = 1;
+    header.depth = 1;
+    header.low_image_format = IMAGE_FORMAT_NONE;
 
     // 3. Write VTF
     FILE* f = fopen(vPath, "wb");
@@ -402,7 +410,50 @@ JNIEXPORT jboolean JNICALL Java_zzh_bin_valvevtftool_VtfLib_pngToVtf(JNIEnv* env
         return JNI_FALSE;
     }
     fwrite(&header, sizeof(header), 1, f);
-    fwrite(buffer, PNG_IMAGE_SIZE(image), 1, f);
+
+    if (format == IMAGE_FORMAT_RGBA8888) {
+        fwrite(buffer, PNG_IMAGE_SIZE(image), 1, f);
+    } else if (format == IMAGE_FORMAT_DXT1 || format == IMAGE_FORMAT_DXT3 || format == IMAGE_FORMAT_DXT5) {
+        int block_size = (format == IMAGE_FORMAT_DXT1) ? 8 : 16;
+        int num_blocks_x = (width + 3) / 4;
+        int num_blocks_y = (height + 3) / 4;
+        
+        uint8_t* compressed = malloc(num_blocks_x * num_blocks_y * block_size);
+        if (compressed) {
+            for (int y = 0; y < num_blocks_y; y++) {
+                for (int x = 0; x < num_blocks_x; x++) {
+                    uint8_t block_rgba[64];
+                    for (int py = 0; py < 4; py++) {
+                        for (int px = 0; px < 4; px++) {
+                            int sx = x * 4 + px;
+                            int sy = y * 4 + py;
+                            if (sx >= width) sx = width - 1;
+                            if (sy >= height) sy = height - 1;
+                            memcpy(&block_rgba[(py * 4 + px) * 4], &buffer[(sy * width + sx) * 4], 4);
+                        }
+                    }
+                    
+                    uint8_t* dest = &compressed[(y * num_blocks_x + x) * block_size];
+                    if (format == IMAGE_FORMAT_DXT1) {
+                        stb_compress_dxt_block(dest, block_rgba, 0, STB_DXT_HIGHQUAL);
+                    } else if (format == IMAGE_FORMAT_DXT3) {
+                        // DXT3: 8 bytes explicit alpha, 8 bytes DXT1 color
+                        for (int i = 0; i < 8; i++) {
+                            uint8_t a0 = block_rgba[(i * 2) * 4 + 3] >> 4;
+                            uint8_t a1 = block_rgba[(i * 2 + 1) * 4 + 3] >> 4;
+                            dest[i] = a0 | (a1 << 4);
+                        }
+                        stb_compress_dxt_block(dest + 8, block_rgba, 0, STB_DXT_HIGHQUAL);
+                    } else if (format == IMAGE_FORMAT_DXT5) {
+                        stb_compress_dxt_block(dest, block_rgba, 1, STB_DXT_HIGHQUAL);
+                    }
+                }
+            }
+            fwrite(compressed, num_blocks_x * num_blocks_y * block_size, 1, f);
+            free(compressed);
+        }
+    }
+
     fclose(f);
 
     // 4. Cleanup

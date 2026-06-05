@@ -8,6 +8,6 @@ object VtfLib {
     }
 
     external fun vtfToPng(vtfPath: String, pngPath: String): Boolean
-    external fun pngToVtf(pngPath: String, vtfPath: String): Boolean
+    external fun pngToVtf(pngPath: String, vtfPath: String, format: Int): Boolean
     external fun getVtfBitmap(vtfPath: String): Bitmap?
 }

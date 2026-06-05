@@ -87,6 +87,10 @@ fun VtfToolScreen() {
     var isConverting by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0f) }
     var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    
+    val formats = listOf("RGBA8888" to 0, "DXT1" to 13, "DXT3" to 14, "DXT5" to 15)
+    var selectedFormat by remember { mutableStateOf(formats[0]) }
+    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val prefs = context.getSharedPreferences("vtftool_prefs", android.content.Context.MODE_PRIVATE)
@@ -144,7 +148,7 @@ fun VtfToolScreen() {
         }
     }
 
-    suspend fun convertFile(file: DocumentFile, outputDir: DocumentFile): Boolean = withContext(Dispatchers.IO) {
+    suspend fun convertFile(file: DocumentFile, outputDir: DocumentFile, format: Int): Boolean = withContext(Dispatchers.IO) {
         try {
             val tempFile = File(context.cacheDir, file.name ?: "temp")
             context.contentResolver.openInputStream(file.uri)?.use { input ->
@@ -155,7 +159,7 @@ fun VtfToolScreen() {
             val outFile = File(context.cacheDir, outName)
 
             val success = if (file.name?.endsWith(".png") == true) {
-                VtfLib.pngToVtf(tempFile.absolutePath, outFile.absolutePath)
+                VtfLib.pngToVtf(tempFile.absolutePath, outFile.absolutePath, format)
             } else {
                 VtfLib.vtfToPng(tempFile.absolutePath, outFile.absolutePath)
             }
@@ -198,6 +202,23 @@ fun VtfToolScreen() {
             DirectoryPicker("Input Selection", inputDir) {} // Using it as display only now
             DirectoryPicker("Output Directory", outputDir) { outputLauncher.launch(null) }
             
+            Box {
+                OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Target VTF Format: ${selectedFormat.first}")
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    formats.forEach { format ->
+                        DropdownMenuItem(
+                            text = { Text(format.first) },
+                            onClick = {
+                                selectedFormat = format
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            
             Text("Status: $status", style = MaterialTheme.typography.bodyMedium)
             if (isConverting) {
                 LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
@@ -219,7 +240,7 @@ fun VtfToolScreen() {
                             scope.launch {
                                 isConverting = true
                                 status = "Converting ${file.name}..."
-                                val success = convertFile(file, outputDir!!)
+                                val success = convertFile(file, outputDir!!, selectedFormat.second)
                                 status = if (success) "Converted ${file.name}" else "Failed ${file.name}"
                                 snackbarHostState.showSnackbar(status)
                                 isConverting = false
@@ -256,7 +277,7 @@ fun VtfToolScreen() {
                         var successCount = 0
                         selectedFiles.forEachIndexed { index, file ->
                             progress = index.toFloat() / selectedFiles.size
-                            if (convertFile(file, outputDir!!)) successCount++
+                            if (convertFile(file, outputDir!!, selectedFormat.second)) successCount++
                         }
                         status = "Converted $successCount/${selectedFiles.size} files"
                         snackbarHostState.showSnackbar(status)
