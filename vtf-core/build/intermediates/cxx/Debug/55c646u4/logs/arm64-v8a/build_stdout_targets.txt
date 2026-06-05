@@ -1,0 +1,50 @@
+ninja: Entering directory `/data/data/com.termux/files/home/vtftool/vtf-core/.cxx/Debug/55c646u4/arm64-v8a'
+[1/49] Building C object libpng/CMakeFiles/png_shared.dir/pngrio.c.o
+[2/49] Building C object libpng/CMakeFiles/png_shared.dir/pngmem.c.o
+[3/49] Building C object libpng/CMakeFiles/png_shared.dir/pngerror.c.o
+[4/49] Building C object libpng/CMakeFiles/png_shared.dir/pngpread.c.o
+[5/49] Building C object libpng/CMakeFiles/png_shared.dir/pngget.c.o
+[6/49] Building C object libpng/CMakeFiles/png_shared.dir/pngwio.c.o
+[7/49] Building C object libpng/CMakeFiles/png_shared.dir/pngtrans.c.o
+[8/49] Building C object libpng/CMakeFiles/png_shared.dir/pngset.c.o
+[9/49] Building C object libpng/CMakeFiles/png_shared.dir/pngwtran.c.o
+[10/49] Building C object libpng/CMakeFiles/png_shared.dir/pngread.c.o
+[11/49] Building C object libpng/CMakeFiles/png_shared.dir/png.c.o
+[12/49] Building C object libpng/CMakeFiles/png_static.dir/pngerror.c.o
+[13/49] Building C object libpng/CMakeFiles/png_shared.dir/pngrtran.c.o
+[14/49] Building C object libpng/CMakeFiles/png_shared.dir/pngwrite.c.o
+[15/49] Building C object libpng/CMakeFiles/png_static.dir/pngmem.c.o
+[16/49] Building C object libpng/CMakeFiles/png_static.dir/pngrio.c.o
+[17/49] Building C object libpng/CMakeFiles/png_static.dir/png.c.o
+[18/49] Building C object libpng/CMakeFiles/png_static.dir/pngget.c.o
+[19/49] Building C object libpng/CMakeFiles/png_shared.dir/pngwutil.c.o
+[20/49] Building C object libpng/CMakeFiles/png_shared.dir/pngrutil.c.o
+[21/49] Building C object libpng/CMakeFiles/png_static.dir/pngpread.c.o
+[22/49] Building C object libpng/CMakeFiles/png_static.dir/pngwio.c.o
+[23/49] Building C object libpng/CMakeFiles/png_static.dir/pngtrans.c.o
+[24/49] Building C object libpng/CMakeFiles/png_static.dir/pngwtran.c.o
+[25/49] Building C object libpng/CMakeFiles/png_shared.dir/pngsimd.c.o
+[26/49] Linking C shared library /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/libpng18d.so.18.0.git
+[27/49] Building C object libpng/CMakeFiles/png_static.dir/pngwrite.c.o
+[28/49] Creating library symlink /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/libpng18d.so.18 /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/libpng18d.so
+[29/49] Building C object libpng/CMakeFiles/png_static.dir/pngset.c.o
+[30/49] Building C object libpng/CMakeFiles/png_static.dir/pngread.c.o
+[31/49] Building C object libpng/CMakeFiles/png_static.dir/pngwutil.c.o
+[32/49] Building C object libpng/CMakeFiles/pngtest.dir/pngtest.c.o
+[33/49] Linking C executable /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/pngtest
+[34/49] Building C object libpng/CMakeFiles/png_static.dir/pngrtran.c.o
+[35/49] Building C object CMakeFiles/valvevtftool.dir/vtf_tool.c.o
+[36/49] Building C object libpng/CMakeFiles/png_static.dir/pngrutil.c.o
+[37/49] Building C object libpng/CMakeFiles/pnggetset.dir/contrib/libtests/pnggetset.c.o
+[38/49] Linking C executable /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/pnggetset
+[39/49] Building C object libpng/CMakeFiles/pngunknown.dir/contrib/libtests/pngunknown.c.o
+[40/49] Building C object libpng/CMakeFiles/pngimage.dir/contrib/libtests/pngimage.c.o
+[41/49] Linking C executable /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/pngunknown
+[42/49] Linking C executable /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/pngimage
+[43/49] Building C object libpng/CMakeFiles/pngstest.dir/contrib/libtests/pngstest.c.o
+[44/49] Linking C executable /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/pngstest
+[45/49] Building C object libpng/CMakeFiles/png_static.dir/pngsimd.c.o
+[46/49] Linking C static library libpng/libpng18d.a
+[47/49] Linking C shared library /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/libvalvevtftool.so
+[48/49] Building C object libpng/CMakeFiles/pngvalid.dir/contrib/libtests/pngvalid.c.o
+[49/49] Linking C executable /data/data/com.termux/files/home/vtftool/vtf-core/build/intermediates/cxx/Debug/55c646u4/obj/arm64-v8a/pngvalid

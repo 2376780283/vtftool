@@ -88,7 +88,12 @@ fun VtfToolScreen() {
     var progress by remember { mutableStateOf(0f) }
     var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
     
-    val formats = listOf("RGBA8888" to 0, "DXT1" to 13, "DXT3" to 14, "DXT5" to 15)
+    val formats = listOf(
+        "RGBA8888" to VtfLib.FORMAT_RGBA8888,
+        "DXT1" to VtfLib.FORMAT_DXT1,
+        "DXT3" to VtfLib.FORMAT_DXT3,
+        "DXT5" to VtfLib.FORMAT_DXT5
+    )
     var selectedFormat by remember { mutableStateOf(formats[0]) }
     var expanded by remember { mutableStateOf(false) }
 

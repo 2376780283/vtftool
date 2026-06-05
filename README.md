@@ -4,17 +4,38 @@
 
 ## 项目架构
 
-该项目分为三个主要层级：
+为了提高可集成性和模块化，项目已重构为多模块结构：
 
-1.  **原生转换核心 (C/JNI)**：负责底层图像解析和格式转换。
-2.  **Kotlin 库包装器**：提供简单的 API 桥梁。
-3.  **用户界面 (Jetpack Compose)**：提供文件选择和异步处理逻辑。
+### 1. 核心库模块 (`:vtf-core`)
+这是一个独立的 Android Library 模块，包含了所有的转换逻辑，可以轻松集成到其他 Android 项目中。
+-   **原生核心 (C/JNI)**：位于 `src/main/cpp/`，包含 `vtf_tool.c`、`libpng`、`stb_dxt` 等。
+-   **Java/Kotlin 接口**：位于 `zzh.bin.valvevtftool.VtfLib`，提供跨语言调用的标准 API 和格式常量。
+-   **导出能力**：编译后可生成 `.aar` 文件供第三方使用。
+
+### 2. 用户界面模块 (`:app`)
+-   **技术栈**：Jetpack Compose。
+-   **职责**：负责 UI 交互、SAF 文件访问权限管理、异步任务调度，并依赖 `:vtf-core` 执行实际转换。
+
+---
+
+## 如何集成到你的项目
+
+1.  将 `vtf-core` 文件夹复制到你的项目根目录。
+2.  在 `settings.gradle.kts` 中添加：
+    ```kotlin
+    include(":vtf-core")
+    ```
+3.  在你的模块 `build.gradle.kts` 中添加依赖：
+    ```kotlin
+    implementation(project(":vtf-core"))
+    ```
+4.  直接使用 `VtfLib` 调用相关转换功能。
 
 ---
 
 ## 原生转换核心 (`vtf_tool.c`) 深度分析
 
-核心逻辑位于 `app/src/main/jni/vtf_tool.c`。以下是对其技术实现点的详细解析：
+核心逻辑位于 `vtf-core/src/main/cpp/vtf_tool.c`。以下是对其技术实现点的详细解析：
 
 ### 1. 内存与文件处理
 -   **高效读取 (`mmap`)**：程序使用 `mmap` 系统调用将 VTF 文件映射到内存地址空间。相比于传统的 `read()`，这在处理大文件时能减少内核态与用户态之间的数据拷贝，并允许通过指针直接访问文件内容。

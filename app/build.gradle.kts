@@ -44,11 +44,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }    
-    externalNativeBuild {
-          cmake {
-              path = file("src/main/jni/CMakeLists.txt")
-          }
-    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -58,7 +53,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 dependencies {
-
+    implementation(project(":vtf-core"))
     implementation(platform("androidx.compose:compose-bom:2022.10.00"))
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")

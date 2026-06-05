@@ -1,0 +1,11 @@
+/data/data/com.termux/files/home/android-sdk/cmake/3.22.1/bin/ninja \
+  -C \
+  /data/data/com.termux/files/home/vtftool/vtf-core/.cxx/Debug/55c646u4/armeabi-v7a \
+  png_shared \
+  pnggetset \
+  pngimage \
+  pngstest \
+  pngtest \
+  pngunknown \
+  pngvalid \
+  valvevtftool

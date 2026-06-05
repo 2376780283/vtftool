@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "VtfTool"
 
 include(":app")
+include(":vtf-core")
